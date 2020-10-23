@@ -5,6 +5,7 @@
 #include <vector>
 #include <functional>
 #include <unordered_map>
+#include <hopscotch_map.hpp>
 
 #include <component.hpp>
 
@@ -12,9 +13,10 @@ namespace crs {
 	template <typename T>
 	class registry {
 	private:
+		std::hash<K> _hash;
 		std::vector<T> _data;
 		std::function<void(T&)> _update;
-		std::unordered_map<std::size_t, std::size_t> _map;
+		tsl::hopscotch_map<std::size_t, std::size_t> _map;
 
 		registry(const registry<T>&) = delete;
 
@@ -89,7 +91,7 @@ namespace crs {
 		std::pair<std::size_t, std::reference_wrapper<T>> emplace(Args&&... args)
 		{
 			T& c = _data.emplace_back(args...);
-			c._handle = static_cast<std::size_t>(clock());
+			c._handle = _hash(k);
 			
 			_map.emplace(c._handle, _data.size() - 1);
 
@@ -111,7 +113,7 @@ namespace crs {
 				_map.erase(eraseIt);
 			} else {
 				auto movedIt = _map.find(_data[eraseIt->second]._handle);
-				movedIt->second = eraseIt->second;
+				movedIt.value() = eraseIt->second;
 			}
 		}
 	};

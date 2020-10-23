@@ -1,3 +1,4 @@
+#include <fstream>
 #include <vector>
 #include <chrono>
 #include <iomanip>
@@ -47,13 +48,16 @@ inline void test_deletion(crs::registry<transform>& r)
 
 int main()
 {
-	crs::registry<transform> r([](transform& t) { std::cout << "x: " << t.x << std::endl; });
-	
 	std::cout << std::fixed << std::setprecision(9) << std::left;
 
-	auto r1 = test_insertion(r);
-	r.clear();
-	auto r2 = test_insertion(r);
+#if 1
+	crs::registry<transform> r([](transform& t) { std::cout << "x: " << t.x << std::endl; });
 
-	std::cout << "% improv: " << (r1 - r2) / r1 << std::endl;
+	std::fstream f("tsl", std::fstream::app);
+
+	f << test_insertion(r) << std::endl;
+
+	f.close();
+	r.clear();
+#endif
 }
